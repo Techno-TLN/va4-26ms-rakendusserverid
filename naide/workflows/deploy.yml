@@ -1,0 +1,42 @@
+# 2. kohtumine: paigaldab main-haru kursuseserverisse.
+# Kopeeri oma repos asukohta .github/workflows/deploy.yml
+# Vajalikud secrets: SSH_PRIVATE_KEY, SSH_KNOWN_HOSTS, SERVER_HOST, SERVER_USER, SERVER_PATH
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency: deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: SSH seadistus
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: rsync staatiline leht
+        run: >
+          rsync -avz --delete --chmod=D755,F644 ./public/
+          "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:${{ secrets.SERVER_PATH }}/"
+
+      # --- 3. kohtumine: eemalda kommentaarid ---
+      # - name: rsync rakendus
+      #   run: rsync -avz --delete ./app/ "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:~/app/"
+      # - name: Taaskäivita rakendus
+      #   run: ssh "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" "systemctl --user restart notes"
+      # - name: Tervisekontroll
+      #   run: |
+      #     sleep 2
+      #     curl -fsS "http://${{ secrets.SERVER_USER }}.193.40.160.3.sslip.io/api/health"

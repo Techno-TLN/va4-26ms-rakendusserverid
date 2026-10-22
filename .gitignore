@@ -1,0 +1,3 @@
+# Õpilaste nimekiri ei kuulu avalikku repasse
+*.csv
+!server/opilased.naidis.csv

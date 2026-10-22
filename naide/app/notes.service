@@ -1,0 +1,14 @@
+# systemd kasutajateenus. Asukoht serveris: ~/.config/systemd/user/notes.service
+# Käivitamine: systemctl --user daemon-reload && systemctl --user enable --now notes
+[Unit]
+Description=K-TVA4-26MS märkmete API
+
+[Service]
+WorkingDirectory=%h/app
+ExecStart=/usr/bin/node server.js
+# Pane siia õpetajalt saadud port:
+Environment=PORT=3001
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

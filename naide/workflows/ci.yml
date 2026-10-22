@@ -1,0 +1,24 @@
+# 2. kohtumine: kontrollib iga Pull Requesti enne merge'i.
+# Kopeeri oma repos asukohta .github/workflows/ci.yml
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  html-kontroll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: HTML valideerimine
+        run: npx --yes html-validate "public/**/*.html"
+      - name: API süntaksikontroll
+        run: |
+          if [ -f app/server.js ]; then node --check app/server.js; fi
